@@ -1,0 +1,23 @@
+export default {
+  name: 'Email-to-SMS',
+  exchange: {
+    server: 'https://exchange.example.com',
+    user: '***',
+    password: '***',
+    batchSize: 10,
+  },
+  sms: {
+    server: 'https://a2p-api.megalabs.ru/sms/v1/sms',
+    user: '***',
+    password: '***',
+    from: 'SLPK-SMS',
+  },
+  telegram: {
+    botToken: '***',
+    chatId: '***',
+    tries: 3,
+  },
+  logLevel: ['debug', 'info', 'warn', 'error'][0],
+  timeout: 30000,
+  errorStategy: ['fail', 'retry'][1],
+};

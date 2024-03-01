@@ -1,0 +1,37 @@
+{
+  "name": "email-to-sms",
+  "version": "1.0.0",
+  "description": "email to sms utility service",
+  "type": "module",
+  "main": "src/email-to-sms.js",
+  "scripts": {
+    "build": "esbuild ./src/email-to-sms.js --minify --sourcemap --bundle --platform=node --main-fields=module,main --outdir=dist --external:deasync",
+    "start": "node --use-openssl-ca --openssl-legacy-provider src/email-to-sms.js",
+    "debug": "node --use-openssl-ca --openssl-legacy-provider --inspect-brk src/email-to-sms.js",
+    "test": "node --use-openssl-ca --openssl-legacy-provider test"
+  },
+  "keywords": [
+    "email",
+    "sms",
+    "ews"
+  ],
+  "author": "Roman Karpov",
+  "license": "MIT",
+  "devDependencies": {
+    "baretest": "^2.0.0",
+    "esbuild": "^0.17.19",
+    "eslint": "^8.55.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-security-node": "^1.1.1"
+  },
+  "dependencies": {
+    "@ewsjs/xhr": "^2.0.1",
+    "ews-javascript-api": "^0.13.0",
+    "loglevel": "^1.9.1",
+    "loglevel-plugin-prefix": "^0.8.4"
+  }
+}
