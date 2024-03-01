@@ -34,7 +34,7 @@ export default class EmailProcessor {
       const emails = await this.exchangeClient.getEmails(this.options.exchange.batchSize);
 
       for (const email of emails) {
-        const message = email.TextBody?.text;
+        const message = email.TextBody?.text?.substring(0, this.options.sms.messageSizeLimit);
         const tels = email.Subject?.replaceAll(/[\+\-\s\t\n\(\)]/g, '').split(';').filter(Boolean).filter(re.test.bind(re));
         if (!tels || !tels.length || !message) {
           log.info('Email message skipped as malformed. Subject:', email.Subject, 'Body:', email.TextBody.text);
@@ -42,8 +42,8 @@ export default class EmailProcessor {
           continue;
         }
         for (const tel of tels) {
-          await this.smsClient.sendMessage(tel, message);
-          log.info(`SMS sent successfully. Tel: ${tel}, message: ${message}`);
+          const response = await this.smsClient.sendMessage(tel, message);
+          log.info(`SMS sent successfully: ${response}\nTel: ${tel}\nMessage: ${message}`);
         }
         await this.exchangeClient.deleteEmail(email);
       }

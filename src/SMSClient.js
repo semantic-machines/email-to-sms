@@ -30,7 +30,15 @@ export default class SMSClient {
       if (!response.ok) {
         const status = response.status;
         const text = await response.text();
-        throw new Error(`Status: ${status}, text: ${text}`);
+        throw new Error(`SMS service HTTP request error. Status: ${status}, response: ${text}`);
+      } else {
+        const responseJSON = await response.json();
+        const responseText = JSON.stringify(responseJSON);
+        if (responseJSON.result.status.code !== 0) {
+          throw new Error(`SMS service internal error: ${responseText}`);
+        } else {
+          return responseText;
+        }
       }
     } catch (error) {
       log.error('SMS send error:', error.message);
