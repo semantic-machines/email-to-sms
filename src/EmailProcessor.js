@@ -44,6 +44,7 @@ export default class EmailProcessor {
         for (const tel of tels) {
           const response = await this.smsClient.sendMessage(tel, message);
           log.info(`SMS sent successfully: ${response}\nTel: ${tel}\nMessage: ${message}`);
+          await timeout(this.options.timeout / 10);
         }
         await this.exchangeClient.deleteEmail(email);
       }
