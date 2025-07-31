@@ -5,3 +5,7 @@ export function timeout (ms = options.timeout) {
     setTimeout(resolve, ms);
   });
 }
+
+export function onlyUnique (value, index, array) {
+  return array.indexOf(value) === index;
+}

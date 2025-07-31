@@ -26,16 +26,17 @@ export default class SMSClient {
         },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) {
         const status = response.status;
         const text = await response.text();
-        throw new Error(`SMS service HTTP request error. Status: ${status}, response: ${text}`);
+        throw new Error(`SMS service HTTP request error. Status: ${status}, response: ${text}, message: ${message}, tel: ${tel}`);
       } else {
         const responseJSON = await response.json();
         const responseText = JSON.stringify(responseJSON);
         if (responseJSON.result.status.code !== 0) {
-          throw new Error(`SMS service internal error: ${responseText}`);
+          const error = new Error(`SMS service internal error: ${responseText}, message: ${message}, tel: ${tel}`);
+          error.code = responseJSON.result.status.code;
+          throw error;
         } else {
           return responseText;
         }
