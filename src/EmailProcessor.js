@@ -96,7 +96,12 @@ export default class EmailProcessor {
       if (this.options.dispetcherEmails.some((e) => email.From.address == e)) {
         await this.handleDispetcherEvent(email);
       } else {
-        log.info('Default event received');
+        try {
+          log.info(`Default event received. From: ${email.From.address}`);
+          log.info(`Sender: ${JSON.stringify(email.Sender)}`);
+        } catch (error) {
+          log.debug(error);
+        }
         this.eventsQueue.push({type: 'default', email});
       }
     }

@@ -56,7 +56,7 @@ export default class ExchangeClient {
     } catch (error) {
       log.error('Error deleting email:', error.message);
       log.debug(error);
-      throw error;
+      //throw error;
     }
   }
 
@@ -65,6 +65,7 @@ export default class ExchangeClient {
     try {
       const propertySet = new ews.PropertySet(ews.BasePropertySet.IdOnly);
       propertySet.Add(ews.EmailMessageSchema.From);
+      propertySet.Add(ews.EmailMessageSchema.Sender);
       propertySet.Add(ews.EmailMessageSchema.Subject);
       propertySet.Add(ews.EmailMessageSchema.TextBody);
       propertySet.Add(ews.EmailMessageSchema.Attachments);
@@ -97,28 +98,39 @@ export default class ExchangeClient {
   async replyEmail (email, body, fileName) {
     try {
       const reply = email.CreateReply(true);
-      reply.Body = new ews.MessageBody(body);
       
       // Добавляем вложение, если fileName передан
-      // if (fileName) {
-      //   const fs = await import('fs/promises');
-      //   try {
-      //     const fileContent = await fs.readFile(fileName);
-      //     const attachment = new ews.FileAttachment(fileName);
-      //     attachment.Content = fileContent;
-          
-      //     // Инициализируем коллекцию вложений, если она не существует
-      //     if (!reply.Attachments) {
-      //       reply.Attachments = new ews.AttachmentCollection();
-      //     }
-          
-      //     reply.Attachments.Add(attachment);
-      //   } catch (fileError) {
-      //     log.error(`Error reading attachment file ${fileName}:`, fileError.message);
-      //     // Продолжаем отправку письма без вложения
-      //   }
-      // }
-      
+      if (fileName) {
+        const fs = await import('fs/promises');
+        try {
+          const fileBuffer = await fs.readFile(fileName);
+          // Обрабатываем содержимое файла
+          const fileContent = fileBuffer.toString('utf8');
+          const lines = fileContent.split('\n');
+          const failedPhones = [];
+          // Пропускаем заголовок и обрабатываем каждую строку
+          let failedInfo = '';
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line) {
+              const [phone, result] = line.split(',');
+              if (result.trim() !== 'OK') {
+                failedPhones.push(phone.trim());
+                failedInfo += `\r\n${line}`;
+              }
+            }
+          }
+          if (failedPhones.length > 0) {
+            body += `\r\n\r\nНе удалось отправить СМС на следующие номера: ${failedInfo}`;
+            log.info(`Failed phones: ${failedPhones.join(', ')}`);
+          }
+        } catch (fileError) {
+          log.error(`Error reading attachment file ${fileName}:`, fileError.message);
+          // Продолжаем отправку письма без вложения
+        }
+      }
+      reply.Body = new ews.MessageBody(ews.BodyType.Text, body);
+      //await reply.Save();
       await reply.Send();
     } catch (error) {
       log.error('Error on reply email:', error.message);
@@ -134,7 +146,7 @@ export default class ExchangeClient {
     } catch (error) {
       log.error('Error marking email as read:', error.message);
       log.debug(error);
-      throw error;
+      //throw error;
     }
   }
 }
