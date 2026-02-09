@@ -98,7 +98,7 @@ export default class EmailProcessor {
       } else {
         try {
           log.info(`Default event received. From: ${email.From.address}`);
-          log.info(`Sender: ${JSON.stringify(email.Sender)}`);
+          //log.info(`Sender: ${JSON.stringify(email.Sender)}`);
         } catch (error) {
           log.debug(error);
         }
@@ -152,14 +152,14 @@ export default class EmailProcessor {
   }
 
   async handleDefaultEmail (email) {
-    const message = email.TextBody?.text?.substring(0, this.options.sms.messageSizeLimit);
+    const text = email.From.address.toLowerCase() == 'syk-sms@slpk.com' ? `PIMS: ${email.TextBody?.text}` : email.TextBody?.text;
+    const message = text.substring(0, this.options.sms.messageSizeLimit);
     const tels = this.extractTels(email.Subject);
     if (!tels.length || !message) {
       log.info('Email message skipped as malformed. Subject:', email.Subject, 'Body:', email.TextBody.text);
       await this.exchangeClient.markAsRead(email);
       return;
     }
-
     await this.sendSmsWithRetry(tels, message, this.options.timeout);
     await this.exchangeClient.markAsRead(email);
     await this.exchangeClient.deleteEmail(email);
